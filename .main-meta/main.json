@@ -4,8 +4,8 @@
     "content": {
         "metaDataVersion": "1.3.0",
         "name": "com.microchip.mcu8.mplabx.project.pic16f13145-biphase-decoder-mplab-mcc",
-        "version": " ",
-        "displayName": "",
+        "version": "1.0.0",
+        "displayName": "Bi-phase Decoder — Use Case for CLB Using the PIC16F13145 Microcontroller with MCC Melody",
         "projectName": "pic16f13145-biphase-decoder-mplab-mcc",
         "shortDescription": "The repository contains one MPLAB X project, Biphase Decoder, using Core Independent Peripherals (CIPs) by following the interaction between CLB, SPI and UART peripherals.",
         "ide": {
@@ -19,12 +19,12 @@
             }
         ],
         "dfp": {
-            "name": "",
-            "semverRange": ""
+            "name": "PIC16F1xxxx_DFP",
+            "semverRange": "^1.25.389"
         },
         "configurator": {
-            "name": "",
-            "semverRange": ""
+            "name": "MCC",
+            "semverRange": ">=5.5.0"
         },
         "device": {
             "metaDataVersion": "1.0.0",
@@ -37,8 +37,17 @@
             }
         },
         "author": "Teodor-Emilian Petre",
-        "peripherals": [],
-        "keywords": [],
+       "peripherals": [
+            "CLB",
+            "SPI",
+            "UART",
+            "TMR2"
+        ],
+        "keywords": [
+            "CLB",
+            "Melody",
+            "Decoder"
+        ],
         "additionalData": {
             "longDescription": {
                 "metaDataVersion": "1.0.0",
