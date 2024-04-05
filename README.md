@@ -2,13 +2,13 @@
 
 <a href="https://www.microchip.com" rel="nofollow"><img src="images/microchip.png" alt="MCHP" width="300"/></a>
 
-# Bi-phase Decoder — Use Case for CLB Using the PIC16F13145 Microcontroller with MCC Melody
+# Bi-Phase Decoder — Use Case for CLB Using the PIC16F13145 Microcontroller with MCC Melody
 
-The repository contains one MPLAB® X project, Biphase Decoder, using Core Independent Peripherals (CIPs) by following the interaction between Custom Logic Block (CLB), Serial Peripheral Interface (SPI) and Universal Asynchronous Receiver-Transmitter (UART) peripherals.
+The repository contains the Bi-Phase Decoder, an MPLAB® X project, using Core Independent Peripherals (CIPs) by following the interaction between Custom Logic Block (CLB), Serial Peripheral Interface (SPI) and Universal Asynchronous Receiver-Transmitter (UART) peripherals.
 
-The CLB peripheral is a collection of logic elements that can be programmed to perform a wide variety of digital logic functions. The logic function may be completely combinatorial, sequential, or a combination of the two, enabling users to incorporate hardware-based custom logic into their applications.
+The CLB peripheral is a collection of logic elements that can be programmed to perform a wide variety of digital logic functions. The logic function may be completely combinatorial, sequential or a combination of the two, enabling users to incorporate hardware-based custom logic into their applications.
 
-The Bi-phase Mark Code (BMC) combines both data and clock in a single signal. One clock cycle is a BMC bit period. A transition always occurs at the beginning of each bit period. A logic `1` is represented by a transition (rising or falling edge) in the middle of the bit period. A logic `0` is represented by no transition in the middle of the period. A BMC encoder accepts a data signal and clock signal as inputs and produces a single BMC-encoded output. A BMC decoder accepts a BMC-encoded signal as the input and produces two outputs: data and clock. BMC is used in standards such as the USB 3.1 Power Delivery Specification CC signaling, AES3 digital audio, or S/PDIF audio. An example is presented in the figure below:
+The Bi-Phase Mark Code (BMC) combines both data and clock in a single signal. One clock cycle is a BMC bit period. A transition always occurs at the beginning of each bit period. A logic `1` is represented by a transition (rising or falling edge) in the middle of the bit period and a logic `0` is represented by no transition in the middle of the period. A BMC encoder accepts a data signal and clock signal as inputs and produces a single BMC-encoded output. A BMC decoder accepts a BMC-encoded signal as the input and produces two outputs: data and clock. BMC is used in standards such as the USB 3.1 Power Delivery Specification CC signaling, AES3 digital audio or S/PDIF audio. The figure below presents an example:
 
 <br><img src="images/biphase_signal.png" width="600">
 
@@ -19,8 +19,8 @@ More details and code examples on the PIC16F13145 can be found at the following 
 - [PIC16F13145 Product Page](https://www.microchip.com/en-us/product/PIC16F13145?utm_source=GitHub&utm_medium=TextLink&utm_campaign=MCU8_MMTCha_PIC16F13145&utm_content=pic16f13145-biphase-decoder-mplab-mcc&utm_bu=MCU08)
 - [PIC16F13145 Code Examples on Discover](https://mplab-discover.microchip.com/v2?dsl=PIC16F13145)
 - [PIC16F13145 Code Examples on GitHub](https://github.com/microchip-pic-avr-examples/?q=PIC16F13145)
-- [Bi-phase Encoder — Use Case for CLB Using the PIC16F13145 Microcontroller with MCC Melody](https://github.com/microchip-pic-avr-examples/pic16f13145-biphase-encoder-mplab-mcc)
-- [Bi-phase Encoder and Decoder - Use Cases for CIPs Using the AVR128DA48 Microcontroller with MCC Melody](https://github.com/microchip-pic-avr-examples/avr128da48-cnano-biphase-mplab-mcc)
+- [Bi-Phase Encoder — Use Case for CLB Using the PIC16F13145 Microcontroller with MCC Melody](https://github.com/microchip-pic-avr-examples/pic16f13145-biphase-encoder-mplab-mcc)
+- [Bi-Phase Encoder and Decoder - Use Cases for CIPs Using the AVR128DA48 Microcontroller with MCC Melody](https://github.com/microchip-pic-avr-examples/avr128da48-cnano-biphase-mplab-mcc)
 
 ## Software Used
 
@@ -39,13 +39,13 @@ To program the Curiosity Nano board with this MPLAB X project, follow the steps 
 
 ## Concept
 
-The encoded data is received through a single data wire. The Non-Return-to-Zero (NRZ) signal and clock signal are recovered using the circuit composed of the logic elements into the CLB peripheral described in the figure below. The resulting signals are routed to the SPI peripheral which reads the data and stores into the internal buffer called `FrameBuffer`, then the decoded data is transmitted further via serial communication, UART, when the encoded messaged was fully received.
+The encoded data is received through a single data wire. The Non-Return-to-Zero (NRZ) signal and clock signal are recovered using the circuit composed of the logic elements contained within the CLB peripheral described in the figure below. The resulting signals are routed to the SPI peripheral which reads and stores the data into the internal buffer called `FrameBuffer`, then the decoded data is transmitted further via the UART serial communication, when the encoded message is fully received.
 
 <img src="images/clb_decoder_circuit.png" width="1000">
 
-The bi-phase encoded signal is received through a single wire. A decoding circuit is implemented using the CLB peripheral. The decoding circuit outputs the recovered NRZ data and a synchronized clock signal that are routed to the SPI peripheral configured in client mode. The SPI peripheral will trigger the CLB circuit whenever a new byte is received, and the current byte will be stored in an internal buffer. The data is further transmitted via serial communication (UART). A time-out mechanism is implemented using the stop timer inside the CLB circuit (when no activity occurs on the bi-phase data line for the duration of 6 bytes).
+The Bi-Phase encoded signal is received through a single wire, while the decoding circuit is implemented using the CLB peripheral. The decoding circuit outputs the recovered NRZ data and a synchronized clock signal that are routed to the SPI peripheral configured in Client mode. The SPI peripheral will trigger the CLB circuit whenever a new byte is received, and the current byte will be stored in an internal buffer. The data is further transmitted via serial communication (UART). A time-out mechanism is implemented using the stop timer inside the CLB circuit, when no activity occurs on the Bi-Phase data line for the duration of six bytes.
 
-An edge detector is implemented using an OR gate, also for data validation two DQ latches with enable and reset pins. When any edge is detected on the encoded input message, the first latch (in the left of the picture) resets and outputs `0` logic, the signal needed for client select pin of the SPI peripheral. The hardware counter module, `pic16f131_counter` is counting up to 8 clock cycles for each bit of the encoded message and it is reset when an edge and the validation of the second latch (right side of the picture) are met into the AND gate. On the last counted bit, the counter is stopped, then the `StopCounter` sub-sheet, that is a implementation of a time-out counter inside the CLB, will count up to 8 to detect if the frame is over, or it is reset if any other edge of the input is detected. When the hardware counter is on, the fifth output, that represents the 6/8 of the period, will enable the latches to output the decoded message for the SPI. The SPI clock is also recovered using the hardware counter, also used to add a frequency tolerance due to possibility of the different operating frequency of the encoder / decoder. The fifth output of the hardware counter is used to verify the encoded bit of the message into the second half of it, not to detect if any other edge is detected in the middle of the transmission. The frequency of the CLB is given by the TMR2 Postscaler option, which means that the bit rate frequency of the decoder can be changed depending of the frequency of the encoded message.
+An edge detector is implemented using an OR gate, as well as two DQ latches with Enable and Reset pins for data validation. When any edge is detected on the encoded input message, the first latch (left side of the picture) resets and outputs a `0` logic, the signal needed for the client select pin of the SPI peripheral. The hardware counter module, `pic16f131_counter`, is counting up to eight clock cycles for each bit of the encoded message and it is reset when an edge and the validation of the second latch (right side of the picture) are met into the AND gate. On the last counted bit, the counter is stopped, then the `StopCounter` sub-sheet, that is an implementation of a time-out counter inside the CLB, will count up to eight to detect if the frame is over, or it is reset if any other edge of the input is detected. When the hardware counter is on, the fifth output, that represents the 6/8 of the period, will enable the latches to output the decoded message for the SPI. The SPI clock is also recovered using the hardware counter, furthermore used to add a frequency tolerance due to possibility of the different operating frequency of the encoder/decoder. The fifth output of the hardware counter is used to verify the encoded bit of the message into the second half of it, not to determine if any other edge is detected in the middle of the transmission. The frequency of the CLB is given by the TMR2 Postscaler option, which means that the bit rate frequency of the decoder can be changed depending of the frequency of the encoded message.
 
 ## Setup
 
@@ -69,7 +69,7 @@ The following peripheral and clock configurations are set up using the MPLAB Cod
    - Clock Divider: 1
      <br><img src="images/mcc_clock_control.png" width="400">
 
-3. MSSP & SPI:
+3. MSSP and SPI:
 
    - Serial Protocol: SPI
      - Mode: Client
@@ -123,18 +123,18 @@ The following peripheral and clock configurations are set up using the MPLAB Cod
 
 ## Demo
 
-In the demo, the `Microchip!` message was inserted by the user in the terminal and encoded on source. The signal received on RA2 pin, biphase encoded signal, and the three outputs of the CLB are visualized using a logic analyzer.
+In the demo, the `Microchip!` message was inserted by the user in the terminal and encoded on source. The signal received on the RA2 pin, Bi-Phase encoded signal, and the three outputs of the CLB are visualized using a logic analyzer.
 
 <br><img src="images/decoder-demo1.png" width="1000">
 
 To use the embedded decoder from the Logic software, the next analyzers settings must be set:
 
-1. BMC Settings:
+1. BMC settings:
    <br><img src="images/decoder-bmc-logic-settings.png" width="400">
-2. SPI Settings:
+2. SPI settings:
    <br><img src="images/decoder-spi-logic-settings.png" width="400">
 
-Also, the `Microchip!` message was inserted by the user in the terminal. The output pin of the encoder platform (left side) - BMC out (the output pin for the Bi-phase encoded signal) - is connected to the input pin of the decoder board and it is visualized using MPLAB Data Visualizer plugin.
+Also, the `Microchip!` message was inserted by the user in the terminal. The output pin of the encoder platform (left side), BMC out (the output pin for the Bi-Phase encoded signal), is connected to the input pin of the decoder board and it is visualized using MPLAB Data Visualizer plug-in.
 
 <br><img src="images/demo.gif" width="1000">
 
@@ -144,18 +144,18 @@ This example demonstrates the capabilities of the CLB, a CIP, that can encode a 
 
 ## How to Program the Curiosity Nano Board
 
-This chapter demonstrates how to use the MPLAB X IDE to program a PIC® device with an Example_Project.X. This is applicable to other projects.
+This chapter demonstrates how to use the MPLAB X IDE to program a PIC® device with an `Example_Project.X`. This is applicable to other projects.
 
 1.  Connect the board to the PC.
 
-2.  Open the Example_Project.X project in MPLAB X IDE.
+2.  Open the `Example_Project.X` project in MPLAB X IDE.
 
-3.  Set the Example_Project.X project as main project.
+3.  Set the `Example_Project.X` project as main project.
     <br>Right click the project in the **Projects** tab and click **Set as Main Project**.
     <br><img src="images/Program_Set_as_Main_Project.png" width="600">
 
-4.  Clean and build the Example_Project.X project.
-    <br>Right click the **Example_Project.X** project and select **Clean and Build**.
+4.  Clean and build the `Example_Project.X` project.
+    <br>Right click the `Example_Project.X` project and select **Clean and Build**.
     <br><img src="images/Program_Clean_and_Build.png" width="600">
 
 5.  Select **PICxxxxx Curiosity Nano** in the Connected Hardware Tool section of the project settings:
