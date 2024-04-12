@@ -41,7 +41,7 @@ To program the Curiosity Nano board with this MPLAB X project, follow the steps 
 
 The encoded data is received through a single data wire. The Non-Return-to-Zero (NRZ) signal and clock signal are recovered using the circuit composed of the logic elements contained within the CLB peripheral described in the figure below. The resulting signals are routed to the SPI peripheral which reads and stores the data into the internal buffer called `FrameBuffer`, then the decoded data is transmitted further via the UART serial communication, when the encoded message is fully received.
 
-<img src="images/clb_decoder_circuit.png" width="1000">
+<br><img src="images/clb_decoder_circuit.png" width="600">
 
 The Bi-Phase encoded signal is received through a single wire, while the decoding circuit is implemented using the CLB peripheral. The decoding circuit outputs the recovered NRZ data and a synchronized clock signal that are routed to the SPI peripheral configured in Client mode. The application software reads the decoded byte and stores it into an internal buffer. When the entire frame is received, the received data is transmitted via serial communication, UART.
 
