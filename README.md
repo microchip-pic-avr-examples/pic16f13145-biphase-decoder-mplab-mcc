@@ -2,7 +2,7 @@
 
 <a href="https://www.microchip.com" rel="nofollow"><img src="images/microchip.png" alt="MCHP" width="300"/></a>
 
-# Bi-Phase Decoder — Use Case for CLB Using the PIC16F13145 Microcontroller with MCC Melody
+# Bi-Phase Decoder with Configurable Bitrate Based on CLB Using the PIC16F13145 Microcontroller with MCC Melody
 
 The repository contains the Bi-Phase Decoder, an MPLAB® X project, using Core Independent Peripherals (CIPs) by following the interaction between Custom Logic Block (CLB), Serial Peripheral Interface (SPI) and Universal Asynchronous Receiver-Transmitter (UART) peripherals.
 
@@ -19,14 +19,14 @@ More details and code examples on the PIC16F13145 can be found at the following 
 - [PIC16F13145 Product Page](https://www.microchip.com/en-us/product/PIC16F13145?utm_source=GitHub&utm_medium=TextLink&utm_campaign=MCU8_MMTCha_PIC16F13145&utm_content=pic16f13145-biphase-decoder-mplab-mcc&utm_bu=MCU08)
 - [PIC16F13145 Code Examples on Discover](https://mplab-discover.microchip.com/v2?dsl=PIC16F13145)
 - [PIC16F13145 Code Examples on GitHub](https://github.com/microchip-pic-avr-examples/?q=PIC16F13145)
-- [Bi-Phase Encoder — Use Case for CLB Using the PIC16F13145 Microcontroller with MCC Melody](https://github.com/microchip-pic-avr-examples/pic16f13145-biphase-encoder-mplab-mcc)
+- [Bi-Phase Encoder with Configurable Bitrate Based on CLB Using the PIC16F13145 Microcontroller with MCC Melody](https://github.com/microchip-pic-avr-examples/pic16f13145-biphase-encoder-mplab-mcc)
 - [Bi-Phase Encoder and Decoder - Use Cases for CIPs Using the AVR128DA48 Microcontroller with MCC Melody](https://github.com/microchip-pic-avr-examples/avr128da48-cnano-biphase-mplab-mcc)
 
 ## Software Used
 
 - [MPLAB X IDE v6.20 or newer](https://www.microchip.com/en-us/tools-resources/develop/mplab-x-ide?utm_source=GitHub&utm_medium=TextLink&utm_campaign=MCU8_MMTCha_PIC16F13145&utm_content=pic16f13145-biphase-decoder-mplab-mcc&utm_bu=MCU08)
 - [MPLAB® XC8 v2.46 or newer](https://www.microchip.com/en-us/tools-resources/develop/mplab-xc-compilers?utm_source=GitHub&utm_medium=TextLink&utm_campaign=MCU8_MMTCha_PIC16F13145&utm_content=pic16f13145-biphase-decoder-mplab-mcc&utm_bu=MCU08)
-- [PIC16F1xxxx_DFP v1.24.387 or newer](https://packs.download.microchip.com/)
+- [PIC16F1xxxx_DFP v1.25.389 or newer](https://packs.download.microchip.com/)
 
 ## Hardware Used
 
@@ -43,9 +43,9 @@ The encoded data is received through a single data wire. The Non-Return-to-Zero 
 
 <img src="images/clb_decoder_circuit.png" width="1000">
 
-The Bi-Phase encoded signal is received through a single wire, while the decoding circuit is implemented using the CLB peripheral. The decoding circuit outputs the recovered NRZ data and a synchronized clock signal that are routed to the SPI peripheral configured in Client mode. The SPI peripheral will trigger the CLB circuit whenever a new byte is received, and the current byte will be stored in an internal buffer. The data is further transmitted via serial communication (UART). A time-out mechanism is implemented using the stop timer inside the CLB circuit, when no activity occurs on the Bi-Phase data line for the duration of six bytes.
+The Bi-Phase encoded signal is received through a single wire, while the decoding circuit is implemented using the CLB peripheral. The decoding circuit outputs the recovered NRZ data and a synchronized clock signal that are routed to the SPI peripheral configured in Client mode. The application software reads the decoded byte and stores it into an internal buffer. When the entire frame is received, the received data is transmitted via serial communication, UART.
 
-An edge detector is implemented using an OR gate, as well as two DQ latches with Enable and Reset pins for data validation. When any edge is detected on the encoded input message, the first latch (left side of the picture) resets and outputs a `0` logic, the signal needed for the client select pin of the SPI peripheral. The hardware counter module, `pic16f131_counter`, is counting up to eight clock cycles for each bit of the encoded message and it is reset when an edge and the validation of the second latch (right side of the picture) are met into the AND gate. On the last counted bit, the counter is stopped, then the `StopCounter` sub-sheet, that is an implementation of a time-out counter inside the CLB, will count up to eight to detect if the frame is over, or it is reset if any other edge of the input is detected. When the hardware counter is on, the fifth output, that represents the 6/8 of the period, will enable the latches to output the decoded message for the SPI. The SPI clock is also recovered using the hardware counter, furthermore used to add a frequency tolerance due to possibility of the different operating frequency of the encoder/decoder. The fifth output of the hardware counter is used to verify the encoded bit of the message into the second half of it, not to determine if any other edge is detected in the middle of the transmission. The frequency of the CLB is given by the TMR2 Postscaler option, which means that the bit rate frequency of the decoder can be changed depending of the frequency of the encoded message.
+The data can be decoded by comparing two consecutive bits of the BMC stream at 0.75 bit period away from the bit boundary. The current implementation of the decoder requires that the first edge in the BMC frame is bit boundary (logic `0`). The first edge is used to start the decoder. To create the 0.75 bit period delay from bit boundary, the hardware counter `pic16f131_counter` clocked at 8 x BMC bitrate is used. The counter's `COUNT_IS_5` output is used to enable bit latching for the SDI output signal. To ensure decoder synchronization with the BMC stream, only bit boundaries edges are allowed to restart the hardware counter. This is done by using a validation latch (right side of the picture) and one logic AND gate. The validation latch will be enabled by the `COUNT_IS_5` output. Also, the hardware counter will be stopped by the `COUNT_IS_7` output. The validation latch and stop logic allow a good frequency tolerance between the BMC encoder and decoder. The `COUNT_IS_7` output enables a counter (`StopCounter` logic circuit) used to detect the end of BMC stream. If no edges are received for seven periods, the SPI Client Select (SS) line is switched to logic `1` to signalize the end of the BMC stream.
 
 ## Setup
 
@@ -174,7 +174,7 @@ This chapter demonstrates how to use the MPLAB X IDE to program a PIC® device w
 
 ## Menu
 
-- [Back to Top](#bi-phase-encoder--use-case-for-clb-using-the-pic16f13145-microcontroller-with-mcc-melody)
+- [Back to Top](#bi-phase-decoder-with-configurable-bitrate-based-on-clb-using-the-pic16f13145-microcontroller-with-mcc-melody)
 - [Back to Related Documentation](#related-documentation)
 - [Back to Software Used](#software-used)
 - [Back to Hardware Used](#hardware-used)
